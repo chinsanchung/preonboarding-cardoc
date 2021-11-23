@@ -7,13 +7,13 @@
 **카닥에서 실제로 사용하는 프레임워크를 토대로 타이어 API를 설계 및 구현합니다.**
 
 - 데이터베이스 환경은 별도로 제공하지 않습니다.
- **RDB중 원하는 방식을 선택**하면 되며, sqlite3 같은 별도의 설치없이 이용 가능한 in-memory DB도 좋으며, 가능하다면 Docker로 준비하셔도 됩니다.
+  **RDB중 원하는 방식을 선택**하면 되며, sqlite3 같은 별도의 설치없이 이용 가능한 in-memory DB도 좋으며, 가능하다면 Docker로 준비하셔도 됩니다.
 - 단, 결과 제출 시 README.md 파일에 실행 방법을 완벽히 서술하여 DB를 포함하여 전체적인 서버를 구동하는데 문제없도록 해야합니다.
 - 데이터베이스 관련처리는 raw query가 아닌 **ORM을 이용하여 구현**합니다.
 - Response Codes API를 성공적으로 호출할 경우 200번 코드를 반환하고, 그 외의 경우에는 아래의 코드로 반환합니다.
-  - 200 OK:	성공
-  - 400 Bad Request:	Parameter가 잘못된 (범위, 값 등)
-  - 401 Unauthorized:	인증을 위한 Header가 잘못됨
+  - 200 OK: 성공
+  - 400 Bad Request: Parameter가 잘못된 (범위, 값 등)
+  - 401 Unauthorized: 인증을 위한 Header가 잘못됨
   - 500 Internal Server Error: 기타 서버 에러
 
 ### 2. 사용자 생성 API
@@ -36,23 +36,24 @@
 /* Request Body 예제 */
 [
   {
-    "id": "candycandy",
-    "trimId": 5000
+    id: 'candycandy',
+    trimId: 5000,
   },
   {
-    "id": "mylovewolkswagen",
-    "trimId": 9000
+    id: 'mylovewolkswagen',
+    trimId: 9000,
   },
   {
-    "id": "bmwwow",
-    "trimId": 11000
+    id: 'bmwwow',
+    trimId: 11000,
   },
   {
-    "id": "dreamcar",
-    "trimId": 15000
-  }
-]
+    id: 'dreamcar',
+    trimId: 15000,
+  },
+];
 ```
+
 **상세구현 가이드**
 
 - 자동차 정보 조회 API의 사용은 아래와 같이 5000, 9000부분에 trimId를 넘겨서 조회할 수 있습니다.
@@ -66,3 +67,11 @@
 ### 4. 사용자가 소유한 타이어 정보 조회 API
 
 - 사용자 ID를 통해서 2번 API에서 저장한 타이어 정보를 조회할 수 있어야 합니다.
+
+## 특이사항(메모)
+
+타이어 정보 저장
+
+trimid 를 요청하면 => 카닥 api 에서 타이어 정보를 불러오고 => 폭, 편평비, 휠사이즈를 각각 따로 저장.
+
+요청은 로그인한 사용자가 하는 게 아닌듯. 최대 5명까지의 사용자 아이디를 보낼 수 있어야한다.
