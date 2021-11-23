@@ -39,4 +39,4 @@ lerna-debug.log*
 
 # .db
 
-.db
+cardoc.db
