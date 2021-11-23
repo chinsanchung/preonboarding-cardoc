@@ -1,4 +1,4 @@
-import { IsString, Max } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 import {
   BeforeInsert,
   Column,
@@ -7,7 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { Property } from './property.entity';
 
@@ -18,16 +18,16 @@ export class User {
 
   @Column()
   @IsString()
-  @Max(12)
+  @Length(5, 12)
   user_id: string;
 
   @Column()
   @IsString()
-  @Max(20)
+  @Length(5, 20)
   password: string;
 
   @CreateDateColumn({ type: 'datetime' })
-  created_at: string;
+  created_at: Date;
 
   @OneToMany((type) => Property, (property) => property.user)
   property: Property[];
@@ -38,7 +38,9 @@ export class User {
       this.password = await bcrypt.hash(this.password, 10);
       return;
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(
+        '비밀번호 암호화에 오류가 발생했습니다.',
+      );
     }
   }
 }
