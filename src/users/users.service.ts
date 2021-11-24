@@ -12,10 +12,7 @@ export class UsersService {
     private readonly users: Repository<User>,
   ) {}
 
-  async createUser({
-    user_id,
-    password,
-  }: CreateUserDto): Promise<IOutput<null>> {
+  async createUser({ user_id, password }: CreateUserDto): Promise<IOutput> {
     try {
       // 1. 아이디 중복 체크
       const existUser = await this.users.findOne({ user_id });
