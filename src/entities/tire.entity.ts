@@ -5,7 +5,7 @@ import { Property } from './property.entity';
 @Entity()
 export class Tire {
   @PrimaryGeneratedColumn()
-  id: number;
+  idx: number;
 
   @Column()
   @IsNumber()

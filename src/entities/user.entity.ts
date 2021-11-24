@@ -14,12 +14,12 @@ import { Property } from './property.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  idx: number;
 
   @Column()
   @IsString()
   @Length(5, 12)
-  user_id: string;
+  id: string;
 
   @Column()
   @IsString()
