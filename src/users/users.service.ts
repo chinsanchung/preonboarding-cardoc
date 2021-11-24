@@ -12,10 +12,10 @@ export class UsersService {
     private readonly users: Repository<User>,
   ) {}
 
-  async createUser({ user_id, password }: CreateUserDto): Promise<IOutput> {
+  async createUser({ id, password }: CreateUserDto): Promise<IOutput> {
     try {
       // 1. 아이디 중복 체크
-      const existUser = await this.users.findOne({ user_id });
+      const existUser = await this.users.findOne({ id });
       if (existUser) {
         return {
           ok: false,
@@ -24,7 +24,7 @@ export class UsersService {
         };
       }
       // 2. 유저 생성
-      await this.users.save(this.users.create({ user_id, password }));
+      await this.users.save(this.users.create({ id, password }));
       return { ok: true };
     } catch (e) {
       console.log('ERR:', e);
@@ -36,7 +36,7 @@ export class UsersService {
     }
   }
 
-  async findOne(user_id: string): Promise<User | undefined> {
-    return this.users.findOne({ user_id });
+  async findOne(id: string): Promise<User | undefined> {
+    return this.users.findOne({ id });
   }
 }

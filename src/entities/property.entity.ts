@@ -5,7 +5,7 @@ import { User } from './user.entity';
 @Entity()
 export class Property {
   @PrimaryGeneratedColumn()
-  id: number;
+  idx: number;
 
   @ManyToOne((type) => User, (user) => user.property)
   user: User;
