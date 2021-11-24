@@ -35,4 +35,8 @@ export class UsersService {
       };
     }
   }
+
+  async findOne(user_id: string): Promise<User | undefined> {
+    return this.users.findOne({ user_id });
+  }
 }
