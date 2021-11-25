@@ -1,10 +1,36 @@
-import { Body, Controller, HttpException, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Property } from '../entities/property.entity';
 import { CreatePropertiesDto } from './dto/create-properties.dto';
+import { GetPropertiesInput } from './dto/get-properties.dto';
 import { PropertiesService } from './properties.service';
 
 @Controller('properties')
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async getTireFromUser(
+    @Request() req,
+    @Query() query: GetPropertiesInput,
+  ): Promise<{ count: number; data: Property[] }> {
+    const limit = query?.limit ? Number(query.limit) : 5;
+    return await this.propertiesService.getTireFromUser({
+      page: Number(query.page),
+      limit,
+      user: req.user,
+    });
+  }
 
   @Post()
   async createProperties(
