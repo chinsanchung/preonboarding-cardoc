@@ -13,12 +13,12 @@ export class Tire {
 
   @Column()
   @IsString()
-  aspect_ratio: string;
+  aspect_ratio: number;
 
   @Column()
   @IsNumber()
   wheel_size: number;
 
-  @OneToMany((type) => Property, (property) => property.tire)
+  @OneToMany((type) => Property, (property) => property.tire, { eager: false })
   property: Property;
 }
