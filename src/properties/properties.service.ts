@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
@@ -9,7 +10,6 @@ import {
   IOutput,
   IOutputWithData,
 } from '../common/interfaces/output.interface';
-import axios from 'axios';
 
 @Injectable()
 export class PropertiesService {
@@ -22,6 +22,26 @@ export class PropertiesService {
     private readonly users: Repository<User>,
     private connection: Connection,
   ) {}
+
+  async getTireFromUser({
+    page,
+    limit,
+    user,
+  }: {
+    page: number;
+    limit: number;
+    user: User;
+  }): Promise<{ count: number; data: Property[] }> {
+    const result = await this.properties.findAndCount({
+      where: { user },
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+    return {
+      count: result[1],
+      data: result[0],
+    };
+  }
 
   private async checkAndReturnUser(id: string): Promise<IOutputWithData<User>> {
     try {
