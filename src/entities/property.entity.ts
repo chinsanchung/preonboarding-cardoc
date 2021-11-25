@@ -10,6 +10,6 @@ export class Property {
   @ManyToOne((type) => User, (user) => user.property)
   user: User;
 
-  @ManyToOne((type) => Tire, (tire) => tire.property)
+  @ManyToOne((type) => Tire, (tire) => tire.property, { eager: true })
   tire: Tire;
 }
