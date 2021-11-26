@@ -1,21 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { User } from '../entities/user.entity';
 import { IOutputWithData } from '../common/interfaces/output.interface';
-import { UsersService } from '../users/users.service';
+import { AuthUserDto } from './dto/auth-user.dto';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
+    @InjectRepository(User)
+    private readonly users: Repository<User>,
     private jwtService: JwtService,
   ) {}
 
   async validateUser(
     id: string,
     pass: string,
-  ): Promise<IOutputWithData<{ idx: number; id: string }>> {
-    const user = await this.usersService.findOne(id);
+  ): Promise<IOutputWithData<AuthUserDto>> {
+    const user = await this.users.findOne({ id });
     if (user) {
       const isCorrectPassword = await bcrypt.compare(pass, user.password);
       if (isCorrectPassword) {
@@ -36,7 +40,7 @@ export class AuthService {
     };
   }
 
-  async login(user: { idx: number; id: string }) {
+  login(user: AuthUserDto): { access_token: string } {
     return { access_token: this.jwtService.sign(user) };
   }
 }

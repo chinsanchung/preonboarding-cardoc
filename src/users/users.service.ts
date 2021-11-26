@@ -27,16 +27,11 @@ export class UsersService {
       await this.users.save(this.users.create({ id, password }));
       return { ok: true };
     } catch (e) {
-      console.log('ERR:', e);
       return {
         ok: false,
         httpStatus: 500,
         error: '유저 생성에 에러가 발생했습니다.',
       };
     }
-  }
-
-  async findOne(id: string): Promise<User | undefined> {
-    return this.users.findOne({ id });
   }
 }
