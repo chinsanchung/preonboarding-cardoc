@@ -23,7 +23,7 @@ export class PropertiesService {
     private connection: Connection,
   ) {}
 
-  async getTireFromUser({
+  async getProperties({
     page,
     limit,
     user,
@@ -41,6 +41,29 @@ export class PropertiesService {
       count: result[1],
       data: result[0],
     };
+  }
+
+  async getProperty({
+    id,
+    user,
+  }: {
+    id: number;
+    user: User;
+  }): Promise<IOutputWithData<Property>> {
+    try {
+      const result = await this.properties.findOne({ idx: id, user });
+      if (result) {
+        return { ok: true, data: result };
+      }
+      return { ok: false, httpStatus: 400, error: '일치하는 정보가 없습니다.' };
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        httpStatus: 500,
+        error: '조회 과정에서 에러가 발생했습니다.',
+      };
+    }
   }
 
   private async checkAndReturnUser(id: string): Promise<IOutputWithData<User>> {

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpException,
+  Param,
   Post,
   Query,
   Request,
@@ -20,16 +21,32 @@ export class PropertiesController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getTireFromUser(
+  async getProperties(
     @Request() req,
     @Query() query: GetPropertiesInput,
   ): Promise<{ count: number; data: Property[] }> {
     const limit = query?.limit ? Number(query.limit) : 5;
-    return await this.propertiesService.getTireFromUser({
+    return await this.propertiesService.getProperties({
       page: Number(query.page),
       limit,
       user: req.user,
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:id')
+  async getProperty(
+    @Request() req,
+    @Param('id') id: string,
+  ): Promise<Property> {
+    const result = await this.propertiesService.getProperty({
+      id: Number(id),
+      user: req.user,
+    });
+    if (result.ok) {
+      return result.data;
+    }
+    throw new HttpException(result.error, result.httpStatus);
   }
 
   @Post()
