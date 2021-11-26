@@ -52,7 +52,7 @@ export class PropertiesController {
   @Post()
   async createProperties(
     @Body() createPropertiesInput: CreatePropertiesDto[],
-  ): Promise<any> {
+  ): Promise<string> {
     const inputLength = createPropertiesInput.length;
     if (inputLength == 0 || inputLength > 5) {
       throw new HttpException('1개부터 5개끼지 등록하실 수 있습니다.', 400);
@@ -61,7 +61,7 @@ export class PropertiesController {
       createPropertiesInput,
     );
     if (result.ok) {
-      return '입력해주신 타이어 정보를 저장했습니다. 이전에 같은 아이디와 타이어를 등록한 경우, 중복이라 간주하여 새로 저장하지 않습니다';
+      return '입력해주신 타이어 정보를 저장했습니다. 만일 동일한 아이디와 타이어로 등록했던 항목이 있을 경우, 중복이라 간주하여 새로 저장하지 않습니다';
     }
     throw new HttpException(result.error, result.httpStatus);
   }

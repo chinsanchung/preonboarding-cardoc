@@ -10,6 +10,7 @@ import {
   IOutput,
   IOutputWithData,
 } from '../common/interfaces/output.interface';
+import { TireInfoDto } from './dto/tire-info.dto';
 
 @Injectable()
 export class PropertiesService {
@@ -57,7 +58,6 @@ export class PropertiesService {
       }
       return { ok: false, httpStatus: 400, error: '일치하는 정보가 없습니다.' };
     } catch (error) {
-      console.log(error);
       return {
         ok: false,
         httpStatus: 500,
@@ -66,7 +66,9 @@ export class PropertiesService {
     }
   }
 
-  private async checkAndReturnUser(id: string): Promise<IOutputWithData<User>> {
+  private async checkAndReturnUserEntity(
+    id: string,
+  ): Promise<IOutputWithData<User>> {
     try {
       const existUser = await this.users.findOne({ id });
       if (existUser) {
@@ -86,11 +88,7 @@ export class PropertiesService {
     }
   }
 
-  private extractTireInfoFromString(tireString: string): {
-    width: number;
-    aspect_ratio: number;
-    wheel_size: number;
-  } {
+  private extractTireInfoFromString(tireString: string): TireInfoDto {
     // 출처: https://stackoverflow.com/a/42828284
     const [width, aspectRatio, wheelSize] = tireString.match(/\d+/g);
     return {
@@ -101,9 +99,7 @@ export class PropertiesService {
   }
   private async getTireInfoFromCarApi(
     trimId: number,
-  ): Promise<
-    IOutputWithData<{ width: number; aspect_ratio: number; wheel_size: number }>
-  > {
+  ): Promise<IOutputWithData<TireInfoDto>> {
     try {
       const response = await axios.get(
         `https://dev.mycar.cardoc.co.kr/v1/trim/${trimId}`,
@@ -124,16 +120,23 @@ export class PropertiesService {
     }
   }
 
-  private async checkOrCreateTireEntity(tireInfo: {
-    width: number;
-    aspect_ratio: number;
-    wheel_size: number;
-  }): Promise<Tire> {
-    const existTire = await this.tires.findOne(tireInfo);
-    if (!existTire) {
-      return await this.tires.save(this.tires.create(tireInfo));
+  private async checkOrCreateAndReturnTireEntity(
+    tireInfo: TireInfoDto,
+  ): Promise<IOutputWithData<Tire>> {
+    try {
+      const existTire = await this.tires.findOne(tireInfo);
+      if (!existTire) {
+        const newTire = await this.tires.save(this.tires.create(tireInfo));
+        return { ok: true, data: newTire };
+      }
+      return { ok: true, data: existTire };
+    } catch (error) {
+      return {
+        ok: false,
+        httpStatus: 500,
+        error: '타이어를 조회 또는 생성하는 과정에서 오류가 발생했습니다.',
+      };
     }
-    return existTire;
   }
 
   private async checkOrCreatePropertyEntity({
@@ -171,13 +174,13 @@ export class PropertiesService {
         const { id, trimId } = createPropertiesInput[i];
         // * 유효한 유저 아이디인지 확인합니다. 한 번 확인한 아이디는 다시 확인하지 않습니다.
         if (!userEntities[id]) {
-          const checkUserExistence = await this.checkAndReturnUser(id);
-          if (!checkUserExistence.ok) {
-            httpStatus = checkUserExistence.httpStatus;
-            error = checkUserExistence.error;
+          const checkUserEntity = await this.checkAndReturnUserEntity(id);
+          if (!checkUserEntity.ok) {
+            httpStatus = checkUserEntity.httpStatus;
+            error = checkUserEntity.error;
             throw new Error();
           }
-          Object.assign(userEntities, { [`${id}`]: checkUserExistence.data });
+          Object.assign(userEntities, { [`${id}`]: checkUserEntity.data });
         }
 
         // * 카닥 API 에서 차에 대한 정보를 불러옵니다. trimId 결과를 entireTireInfo에 저장하여 같은 trimId 로 API 를 호출하는 것을 방지합니다.
@@ -193,12 +196,17 @@ export class PropertiesService {
         }
 
         // * 타이어에 저장한 것인지 확인하고, 저장하지 않으면 타이어 생성을, 저장했으면 타이어 데이터를 불러옵니다.
-        const tire = await this.checkOrCreateTireEntity(
+        const checkTireEntity = await this.checkOrCreateAndReturnTireEntity(
           entireTireInfo[`${trimId}`],
         );
-        Object.assign(tireEntites, { [`${id}`]: tire });
+        if (!checkTireEntity.ok) {
+          httpStatus = checkTireEntity.httpStatus;
+          error = checkTireEntity.error;
+          throw new Error();
+        }
+        Object.assign(tireEntites, { [`${id}`]: checkTireEntity.data });
 
-        // * 프로퍼티에 유저 아이디와 타이어 아이디를 저장합니다. 이전에 같은 아이디와 타이어를 등록한 경우, 중복이라 간주하여 새로 저장하지 않습니다.
+        // * 프로퍼티에 유저 아이디와 타이어 아이디를 저장합니다. 만일 아이디와 타이어 정보가 데이터베이스에 있을 경우, 중복이라 간주하여 다시 등록하지 않습니다.
         await this.checkOrCreatePropertyEntity({
           user: userEntities[`${id}`],
           tire: tireEntites[`${id}`],
