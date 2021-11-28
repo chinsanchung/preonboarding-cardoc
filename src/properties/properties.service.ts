@@ -66,29 +66,20 @@ export class PropertiesService {
     }
   }
 
-  private async checkAndReturnUserEntity(
-    id: string,
-  ): Promise<IOutputWithData<User>> {
+  async checkAndReturnUserEntity(id: string): Promise<IOutputWithData<User>> {
     try {
-      const existUser = await this.users.findOne({ id });
-      if (existUser) {
-        return { ok: true, data: existUser };
-      }
-      return {
-        ok: false,
-        httpStatus: 400,
-        error: `${id} 계정이 존재하지 않습니다.`,
-      };
+      const existUser = await this.users.findOneOrFail({ id });
+      return { ok: true, data: existUser };
     } catch (error) {
       return {
         ok: false,
         httpStatus: 500,
-        error: '유저 조회에 에러가 발생했습니다.',
+        error: `${id} 계정이 존재하지 않습니다.`,
       };
     }
   }
 
-  private extractTireInfoFromString(tireString: string): TireInfoDto {
+  extractTireInfoFromString(tireString: string): TireInfoDto {
     // 출처: https://stackoverflow.com/a/42828284
     const [width, aspectRatio, wheelSize] = tireString.match(/\d+/g);
     return {
@@ -97,7 +88,7 @@ export class PropertiesService {
       wheel_size: Number(wheelSize),
     };
   }
-  private async getTireInfoFromCarApi(
+  async getTireInfoFromCarApi(
     trimId: number,
   ): Promise<IOutputWithData<TireInfoDto>> {
     try {
@@ -111,7 +102,7 @@ export class PropertiesService {
         ok: true,
         data: tireInfo,
       };
-    } catch (err) {
+    } catch (error) {
       return {
         ok: false,
         httpStatus: 400,
@@ -120,7 +111,7 @@ export class PropertiesService {
     }
   }
 
-  private async checkOrCreateAndReturnTireEntity(
+  async checkOrCreateAndReturnTireEntity(
     tireInfo: TireInfoDto,
   ): Promise<IOutputWithData<Tire>> {
     try {
@@ -139,7 +130,7 @@ export class PropertiesService {
     }
   }
 
-  private async checkOrCreatePropertyEntity({
+  async checkOrCreatePropertyEntity({
     user,
     tire,
   }: {
@@ -158,7 +149,7 @@ export class PropertiesService {
   ): Promise<IOutput> {
     // 결과값을 저장하고 finally 에서 활용합니다.
     let ok = false;
-    let httpStatus = 500;
+    let httpStatus = 200;
     let error = '';
     // 이미 조회한 항목은 다시 조회하지 않기 위해 사용합니다.
     const userEntities = {};

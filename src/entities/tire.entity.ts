@@ -20,5 +20,5 @@ export class Tire {
   wheel_size: number;
 
   @OneToMany((type) => Property, (property) => property.tire, { eager: false })
-  property: Property;
+  property?: Property;
 }
