@@ -1,6 +1,6 @@
 # 프리온보딩 백엔드 과정 7번째
 
-카닥에서 제공해주신 API 설계 과제입니다. 헤로쿠를 이용해 배포했으며, 주소는 []()입니다.
+카닥에서 제공해주신 API 설계 과제입니다. 헤로쿠를 이용해 배포했으며, 주소는 [https://preonboarding-cardoc-api.herokuapp.com](https://preonboarding-cardoc-api.herokuapp.com)입니다.
 
 ## 과제에 대한 안내
 
